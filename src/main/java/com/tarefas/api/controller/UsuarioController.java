@@ -2,6 +2,7 @@ package com.tarefas.api.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tarefas.api.dto.UsuarioDTO;
 import com.tarefas.api.model.Usuario;
 import com.tarefas.api.service.UsuarioService;
 
@@ -38,14 +40,14 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarUsuarioPeloId(@PathVariable("id") Long id) {
-        Optional<Usuario> usuario = usuarioService.buscarUsuario(id);
+    public ResponseEntity<UsuarioDTO> buscarUsuarioPeloId(@PathVariable("id") Long id) {
+        UsuarioDTO usuario = usuarioService.buscarUsuario(id);
 
-        if (usuario.isEmpty()) {
+        if (usuario == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        return ResponseEntity.ok().body(usuario.get());
+        return ResponseEntity.ok().body(usuario);
     }
 
     @GetMapping("/email/{email}")
@@ -69,14 +71,14 @@ public class UsuarioController {
         @RequestParam("dataInicio") LocalDate dataInicio,
         @RequestParam("dataFim") LocalDate dataFim) {
         return ResponseEntity.ok().body(usuarioService.buscarUsuariosPelaDataNascimento(dataInicio, dataFim));
-        
+
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarUsuarioPeloId(@PathVariable("id") Long id) {
-        Optional<Usuario> usuario = usuarioService.buscarUsuario(id);
+        UsuarioDTO usuario = usuarioService.buscarUsuario(id);
 
-        if (usuario.isEmpty()) {
+        if (Objects.isNull(usuario)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
@@ -86,17 +88,19 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> atualizarUsuario(
+    public ResponseEntity<UsuarioDTO> atualizarUsuario(
         @PathVariable("id") Long id, 
         @RequestBody Usuario usuarioAtualizado) {
-            Optional<Usuario> usuario = usuarioService.buscarUsuario(id);
+            UsuarioDTO usuario = usuarioService.buscarUsuario(id);
 
-            if (usuario.isEmpty()) {
+            if (Objects.isNull(usuario)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
 
             usuarioAtualizado.setId(id);
-            return ResponseEntity.ok().body(usuarioService.salvarUsuario(usuarioAtualizado));
+            usuarioAtualizado = usuarioService.salvarUsuario(usuarioAtualizado);
+
+            return ResponseEntity.ok().body(usuarioAtualizado.converterParaDTO());
     }
     
 }
