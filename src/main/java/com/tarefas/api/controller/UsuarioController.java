@@ -1,5 +1,6 @@
 package com.tarefas.api.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tarefas.api.model.Usuario;
@@ -44,6 +46,30 @@ public class UsuarioController {
         }
 
         return ResponseEntity.ok().body(usuario.get());
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Usuario> buscarUsuarioPeloEmail(@PathVariable("email") String email) {
+        Optional<Usuario> usuario = usuarioService.buscarUsuarioPeloEmail(email);
+
+        if (usuario.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok().body(usuario.get());
+    }
+
+    @GetMapping("/nome/{nome}")
+    public ResponseEntity<List<Usuario>> buscarUsuariosPeloNome(@PathVariable("nome") String nome) {
+        return ResponseEntity.ok().body(usuarioService.buscarUsuariosPeloNome(nome));
+    }
+
+    @GetMapping("/data")
+    public ResponseEntity<List<Usuario>> filtrarUsuariosPelaDataNascimento(
+        @RequestParam("dataInicio") LocalDate dataInicio,
+        @RequestParam("dataFim") LocalDate dataFim) {
+        return ResponseEntity.ok().body(usuarioService.buscarUsuariosPelaDataNascimento(dataInicio, dataFim));
+        
     }
 
     @DeleteMapping("/{id}")
